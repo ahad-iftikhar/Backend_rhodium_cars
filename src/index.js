@@ -1,12 +1,12 @@
 const dotenv = require("dotenv");
-const connectDB = require("../db/index");
+const connectDB = require("./db/index");
 const { app } = require("./app");
 
-dotenv.config({ path: "./.env" });
+dotenv.config();
 
 const port = process.env.PORT || 8000;
 
-connectDB
+connectDB()
   .then(() => {
     app.on("error", (error) => {
       console.log("ERROR: ", error);
