@@ -18,5 +18,6 @@ connectDB()
     });
   })
   .catch((error) => {
-    console.log("MONGODB connection failed !!! ", error);
+    console.log("MONGODB connection failed!!! ", error);
+    throw error;
   });
