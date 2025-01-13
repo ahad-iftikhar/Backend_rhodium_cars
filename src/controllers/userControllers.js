@@ -1,5 +1,6 @@
 const User = require("./../models/userModel");
 const jwt = require("jsonwebtoken");
+const { promisify } = require("util");
 
 const signToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -14,7 +15,6 @@ const createSendToken = (user, statusCode, req, res) => {
     expires: new Date(
       Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
     ),
-    httpOnly: true,
   };
 
   res.cookie("jwt", token, cookieOptions);
@@ -69,4 +69,26 @@ exports.logout = async (req, res, next) => {
   });
 
   res.status(200).json({ status: "success" });
+};
+
+exports.isLoggedIn = async (req, res, next) => {
+  if (req.cookies.jwt) {
+    try {
+      const decoded = await promisify(jwt.verify)(
+        req.cookies.jwt,
+        process.env.JWT_SECRET
+      );
+
+      const currentUser = await User.findById(decoded.id);
+      if (!currentUser) return next();
+
+      res.status(200).json({
+        status: "success",
+        user: currentUser,
+      });
+      return next();
+    } catch (error) {
+      return next();
+    }
+  }
 };
