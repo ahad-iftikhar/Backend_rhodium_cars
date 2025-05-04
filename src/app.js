@@ -10,54 +10,25 @@ dotenv.config();
 
 const app = express();
 
-// app.use(
-//   cors({
-//     origin: process.env.CORS_ORIGIN.split(",").map((origin) => origin.trim()),
-//     credentials: true,
-//     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-//     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
-//   })
-// );
-
-// // Update OPTIONS handling
-// app.options(
-//   "*",
-//   cors({
-//     origin: process.env.CORS_ORIGIN.split(",").map((origin) => origin.trim()),
-//     credentials: true,
-//     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-//     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
-//   })
-// );
-
-const corsOptions: cors.CorsOptions = {
-    origin: (
-      origin,
-      callback
-    ) => {
-      const allowedOrigins = [
-        'http://localhost:3000', // Your local development
-        'http://localhost:5173', // Your local development
-        'https://carhub-market.vercel.app'
-        // Add other allowed origins as needed
-      ];
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGIN.split(",").map((origin) => origin.trim()),
     credentials: true,
-  };
-  app.use(cors({
-  origin: true,
-  credentials: true,
-}));
-    app.options('*', cors());
-  // app.use((req, res, next) => {
-  //   res.setHeader('Access-Control-Allow-Credentials', 'true');
-  //   next();
-  // });
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+  })
+);
+
+// Update OPTIONS handling
+app.options(
+  "*",
+  cors({
+    origin: process.env.CORS_ORIGIN.split(",").map((origin) => origin.trim()),
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+  })
+);
 
 // Add temporary file directory configuration
 const tmpDirectory = process.env.NODE_ENV === "production" ? "/tmp" : "public";
