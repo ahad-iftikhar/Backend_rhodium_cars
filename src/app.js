@@ -51,10 +51,10 @@ const corsOptions: cors.CorsOptions = {
   };
   app.use(cors(corsOptions));
     app.options('*', cors(corsOptions));
-  app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-    next();
-  });
+  // app.use((req, res, next) => {
+  //   res.setHeader('Access-Control-Allow-Credentials', 'true');
+  //   next();
+  // });
 
 // Add temporary file directory configuration
 const tmpDirectory = process.env.NODE_ENV === "production" ? "/tmp" : "public";
