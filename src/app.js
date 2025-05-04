@@ -49,8 +49,11 @@ const corsOptions: cors.CorsOptions = {
     },
     credentials: true,
   };
-  app.use(cors(corsOptions));
-    app.options('*', cors(corsOptions));
+  app.use(cors({
+  origin: true,
+  credentials: true,
+}));
+    app.options('*', cors());
   // app.use((req, res, next) => {
   //   res.setHeader('Access-Control-Allow-Credentials', 'true');
   //   next();
