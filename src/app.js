@@ -32,8 +32,8 @@ const app = express();
 
 const corsOptions: cors.CorsOptions = {
     origin: (
-      origin: string | undefined,
-      callback: (error: Error | null, allow?: boolean) => void
+      origin,
+      callback
     ) => {
       const allowedOrigins = [
         'http://localhost:3000', // Your local development
