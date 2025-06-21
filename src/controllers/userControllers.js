@@ -10,11 +10,16 @@ const signToken = (id) => {
 
 const createSendToken = (user, statusCode, req, res) => {
   const token = signToken(user._id);
+  console.log("TOKEENNNNN", token);
 
   const cookieOptions = {
     expires: new Date(
       Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
     ),
+    secure: false,
+    // httpOnly: true,
+    // sameSite: "None",
+    // Credential: true,
   };
 
   res.cookie("jwt", token, cookieOptions);
@@ -31,10 +36,12 @@ const createSendToken = (user, statusCode, req, res) => {
 };
 
 exports.signup = async (req, res, next) => {
+  console.log("In controlleer vefore user");
   const newUser = await User.create({
     email: req.body.email,
     password: req.body.password,
   });
+  console.log("In controlleer");
 
   createSendToken(newUser, 201, req, res);
 };
@@ -91,4 +98,44 @@ exports.isLoggedIn = async (req, res, next) => {
       return next();
     }
   }
+  next();
+};
+
+exports.getCurrentUser = async (req, res, next) => {
+  let token;
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer")
+  ) {
+    token = req.headers.authorization.split(" ")[1];
+  } else if (req.cookies.jwt) {
+    token = req.cookies.jwt;
+  }
+  console.log("coolies", req.cookies);
+
+  console.log("Token", token);
+
+  if (!token)
+    return res.status(401).json({
+      status: false,
+      message: "User is not loggedin, Login to get access!",
+    });
+
+  // Verification token
+  const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+
+  // check if user still exits
+  const currentUser = await User.findById(decoded.id);
+  if (!currentUser) {
+    return res.status(401).json({
+      status: false,
+      message: "The user belonging to this token does no longer exist.",
+    });
+  }
+
+  return res.status(200).json({
+    status: true,
+    message: "User exists",
+    data: { currentUser },
+  });
 };

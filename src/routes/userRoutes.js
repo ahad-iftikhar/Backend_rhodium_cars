@@ -3,7 +3,7 @@ const {
   signup,
   login,
   logout,
-  isLoggedIn,
+  getCurrentUser,
 } = require("../controllers/userControllers");
 
 const router = express.Router();
@@ -11,6 +11,6 @@ const router = express.Router();
 router.route("/signup").post(signup);
 router.route("/login").post(login);
 router.route("/logout").get(logout);
-router.route("/verify").get(isLoggedIn);
+router.route("/get-current-user").get(getCurrentUser);
 
 module.exports = router;
