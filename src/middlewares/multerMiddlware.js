@@ -55,3 +55,36 @@ exports.handleImages = async (req, res, next) => {
 
   next();
 };
+
+// Accept only video files
+const multerVideoFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith("video")) {
+    cb(null, true);
+  } else {
+    cb(new Error("Not a video! Please upload only videos."), false);
+  }
+};
+
+// Configure multer for single video upload
+const uploadVideo = multer({
+  storage: multerStorage,
+  fileFilter: multerVideoFilter,
+});
+
+exports.uploadSingleVideo = uploadVideo.single("video");
+
+exports.handleVideoUpload = async (req, res, next) => {
+  try {
+    if (!req.file) return next();
+
+    const cloudinaryResult = await uploadOnCloudinary(req.file.buffer);
+
+    req.body.video = cloudinaryResult.url;
+    next();
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: "Failed to upload video",
+    });
+  }
+};
