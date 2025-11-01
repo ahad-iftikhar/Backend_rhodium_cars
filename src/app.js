@@ -10,25 +10,28 @@ dotenv.config();
 
 const app = express();
 
-app.use(
-  cors({
-    origin: process.env.CORS_ORIGIN.split(",").map((origin) => origin.trim()),
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
-  })
-);
+app.use(cors());
+app.options("*", cors());
 
-// Update OPTIONS handling
-app.options(
-  "*",
-  cors({
-    origin: process.env.CORS_ORIGIN.split(",").map((origin) => origin.trim()),
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
-  })
-);
+// app.use(
+//   cors({
+//     origin: process.env.CORS_ORIGIN.split(",").map((origin) => origin.trim()),
+//     credentials: true,
+//     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+//     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+//   })
+// );
+
+// // Update OPTIONS handling
+// app.options(
+//   "*",
+//   cors({
+//     origin: process.env.CORS_ORIGIN.split(",").map((origin) => origin.trim()),
+//     credentials: true,
+//     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+//     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+//   })
+// );
 
 // Add temporary file directory configuration
 const tmpDirectory = process.env.NODE_ENV === "production" ? "/tmp" : "public";
