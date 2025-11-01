@@ -78,7 +78,7 @@ exports.handleVideoUpload = async (req, res, next) => {
     if (!req.file) return next();
 
     const cloudinaryResult = await uploadOnCloudinary(req.file.buffer);
-
+    console.log("cloudinaryURL: ", cloudinaryResult.url);
     req.body.video = cloudinaryResult.url;
     next();
   } catch (error) {
