@@ -9,22 +9,35 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const uploadOnCloudinary = async (buffer) => {
+const uploadOnCloudinary = async (buffer, options = {}) => {
   try {
     if (!buffer) return null;
+
+    // For large files (>10MB), use chunked upload
+    const bufferSize = Buffer.byteLength(buffer);
+    const isLargeFile = bufferSize > 10 * 1024 * 1024; // 10MB threshold
+
+    const uploadOptions = {
+      resource_type: "auto",
+      chunk_size: isLargeFile ? 6000000 : undefined, // 6MB chunks for large files
+      ...options,
+    };
 
     // Upload the buffer directly to cloudinary
     const response = await new Promise((resolve, reject) => {
       cloudinary.uploader
-        .upload_stream(
-          {
-            resource_type: "auto",
-          },
-          (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
+        .upload_stream(uploadOptions, (error, result) => {
+          if (error) {
+            console.error("Cloudinary upload error:", {
+              message: error.message,
+              http_code: error.http_code,
+              name: error.name,
+            });
+            reject(error);
+          } else {
+            resolve(result);
           }
-        )
+        })
         .end(buffer);
     });
 
@@ -32,7 +45,7 @@ const uploadOnCloudinary = async (buffer) => {
     return response;
   } catch (error) {
     console.error("Cloudinary upload failed:", error);
-    return null;
+    throw error; // Re-throw to let calling code handle it
   }
 };
 

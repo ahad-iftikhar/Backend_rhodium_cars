@@ -10,13 +10,16 @@ const multerFilter = (req, file, cb) => {
   if (file.mimetype.startsWith("image")) {
     cb(null, true);
   } else {
-    cb(new AppError("Not an image! Please upload only images.", 400), false);
+    cb(new Error("Not an image! Please upload only images."), false);
   }
 };
 
 const upload = multer({
   storage: multerStorage,
   fileFilter: multerFilter,
+  limits: {
+    fileSize: 50 * 1024 * 1024, // 50MB for images
+  },
 });
 
 // middlewares
@@ -69,6 +72,9 @@ const multerVideoFilter = (req, file, cb) => {
 const uploadVideo = multer({
   storage: multerStorage,
   fileFilter: multerVideoFilter,
+  limits: {
+    fileSize: 100 * 1024 * 1024, // 100MB for videos
+  },
 });
 
 exports.uploadSingleVideo = uploadVideo.single("video");
@@ -77,14 +83,47 @@ exports.handleVideoUpload = async (req, res, next) => {
   try {
     if (!req.file) return next();
 
-    const cloudinaryResult = await uploadOnCloudinary(req.file.buffer);
+    // Check file size before uploading
+    const fileSize = req.file.buffer.length;
+    const maxSize = 100 * 1024 * 1024; // 100MB
+    if (fileSize > maxSize) {
+      return res.status(413).json({
+        success: false,
+        message: `File size (${(fileSize / 1024 / 1024).toFixed(
+          2
+        )}MB) exceeds maximum allowed size (100MB)`,
+      });
+    }
+
+    const cloudinaryResult = await uploadOnCloudinary(req.file.buffer, {
+      resource_type: "video",
+    });
+
+    if (!cloudinaryResult || !cloudinaryResult.url) {
+      return res.status(400).json({
+        success: false,
+        message: "Failed to upload video to Cloudinary",
+      });
+    }
+
     console.log("cloudinaryURL: ", cloudinaryResult.url);
     req.body.video = cloudinaryResult.url;
     next();
   } catch (error) {
+    console.error("Video upload error:", error);
+
+    // Handle specific Cloudinary errors
+    if (error.http_code === 413) {
+      return res.status(413).json({
+        success: false,
+        message:
+          "File too large. Maximum size is 100MB. Please try a smaller file or compress the video.",
+      });
+    }
+
     return res.status(400).json({
       success: false,
-      message: "Failed to upload video",
+      message: error.message || "Failed to upload video",
     });
   }
 };
