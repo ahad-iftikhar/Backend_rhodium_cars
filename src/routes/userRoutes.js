@@ -20,7 +20,7 @@ router.route("/verify").get(isLoggedIn);
 router
   .route("/yapzap/upload")
   .post(uploadSingleVideo, handleVideoUpload, (req, res) => {
-    res.status(200).json({ message: "success" });
+    res.status(200).json({ message: "success", url: req.body.video });
   });
 
 module.exports = router;
